@@ -10,15 +10,18 @@ import sys
 import pcbnew
 from pcbnew import *
 
-___version___="1.3"
+___version___="1.4"
 
 mm_ius = 1000000.0
 # (consider always drill +0.1)
 DRL_EXTRA=0.1
 DRL_EXTRA_ius=DRL_EXTRA * mm_ius
 
-AR_SET = 0.150
+AR_SET = 0.150   #minimum annular accepted for pads
 MIN_AR_SIZE = AR_SET * mm_ius
+
+AR_SET_V = 0.150  #minimum annular accepted for vias
+MIN_AR_SIZE_V = AR_SET_V * mm_ius
 
 def annring_size(pad):
     # valid for oval pad/drills
@@ -46,7 +49,7 @@ board = pcbnew.GetBoard()
 PassC=FailC=0
 PassCV=FailCV=0
 
-print("annular.py Testing PCB for Annular Ring >= "+repr(AR_SET))
+print("annular.py Testing PCB for Annular Ring Pads >= "+repr(AR_SET)+" Vias >= "+repr(AR_SET_V))
 print("version = "+___version___)
 
 # print "LISTING VIAS:"
@@ -56,7 +59,7 @@ for item in board.GetTracks():
         drill = item.GetDrillValue()
         width = item.GetWidth()
         ARv = vias_annring_size(item)
-        if ARv  < MIN_AR_SIZE:
+        if ARv  < MIN_AR_SIZE_V:
         #            print("AR violation at %s." % (pad.GetPosition() / mm_ius ))  Raw units, needs fixing
             XYpair =  item.GetPosition()
             print("AR violation of "+f_mm(ARv)+" at XY "+f_mm(XYpair[0])+","+f_mm(XYpair[1]) )
