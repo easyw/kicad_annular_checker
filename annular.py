@@ -10,25 +10,30 @@ import sys
 import pcbnew
 from pcbnew import *
 
-___version___="1.1"
+___version___="1.2"
 
 mm_ius = 1000000.0
+# (consider always drill +0.1)
+DRL_EXTRA=0.1
+DRL_EXTRA=DRL_EXTRA * mm_ius
 AR_SET = 0.150
 MIN_AR_SIZE = AR_SET * mm_ius
 
 def annring_size(pad):
     # valid for oval pad/drills
-    annrX=(pad.GetSize()[0]) - (pad.GetDrillSize()[0])
-    annrY=(pad.GetSize()[1]) - (pad.GetDrillSize()[1])
+    annrX=(pad.GetSize()[0]) - ((pad.GetDrillSize()[0]+DRL_EXTRA))/2
+    annrY=(pad.GetSize()[1]) - ((pad.GetDrillSize()[1]+DRL_EXTRA))/2
     #annr=min(pad.GetSize()) - max(pad.GetDrillSize())
     #if annr < MIN_AR_SIZE:
-    #    print pad.GetSize()
-    #    print pad.GetDrillSize()
+    print pad.GetSize()
+    print pad.GetDrillSize()
     return min(annrX,annrY)
 
 def vias_annring_size(via):
     # calculating via annular
-    annr=via.GetWidth() - via.GetDrillValue()
+    annr=(via.GetWidth() - (via.GetDrillValue()+DRL_EXTRA))/2
+    print via.GetWidth()
+    print via.GetDrillValue()
     return annr
     
 def f_mm(raw):
@@ -69,6 +74,7 @@ for module in board.GetModules():
         else:
             PassC = PassC+1
 print("PADS that Pass = "+repr(PassC)+" Fails = "+repr(FailC))
+
 
 #  execfile("annular.py")
 # annular.py Testing PCB for Annular Ring >= 0.15
