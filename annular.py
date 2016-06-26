@@ -10,7 +10,7 @@ import sys
 import pcbnew
 from pcbnew import *
 
-___version___=1.1
+___version___="1.1"
 
 mm_ius = 1000000.0
 AR_SET = 0.150
