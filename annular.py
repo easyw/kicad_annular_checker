@@ -25,15 +25,15 @@ def annring_size(pad):
     annrY=(pad.GetSize()[1]) - ((pad.GetDrillSize()[1]+DRL_EXTRA))/2
     #annr=min(pad.GetSize()) - max(pad.GetDrillSize())
     #if annr < MIN_AR_SIZE:
-    print pad.GetSize()
-    print pad.GetDrillSize()
+    #print pad.GetSize()
+    #print pad.GetDrillSize()
     return min(annrX,annrY)
 
 def vias_annring_size(via):
     # calculating via annular
     annr=(via.GetWidth() - (via.GetDrillValue()+DRL_EXTRA))/2
-    print via.GetWidth()
-    print via.GetDrillValue()
+    #print via.GetWidth()
+    #print via.GetDrillValue()
     return annr
     
 def f_mm(raw):
