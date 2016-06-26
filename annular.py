@@ -10,28 +10,31 @@ import sys
 import pcbnew
 from pcbnew import *
 
-___version___="1.2"
+___version___="1.3"
 
 mm_ius = 1000000.0
 # (consider always drill +0.1)
 DRL_EXTRA=0.1
-DRL_EXTRA=DRL_EXTRA * mm_ius
+DRL_EXTRA_ius=DRL_EXTRA * mm_ius
+
 AR_SET = 0.150
 MIN_AR_SIZE = AR_SET * mm_ius
 
 def annring_size(pad):
     # valid for oval pad/drills
-    annrX=(pad.GetSize()[0]) - ((pad.GetDrillSize()[0]+DRL_EXTRA))/2
-    annrY=(pad.GetSize()[1]) - ((pad.GetDrillSize()[1]+DRL_EXTRA))/2
+    annrX=(pad.GetSize()[0] - (pad.GetDrillSize()[0]+DRL_EXTRA_ius))/2
+    annrY=(pad.GetSize()[1] - (pad.GetDrillSize()[1]+DRL_EXTRA_ius))/2
     #annr=min(pad.GetSize()) - max(pad.GetDrillSize())
     #if annr < MIN_AR_SIZE:
-    #print pad.GetSize()
-    #print pad.GetDrillSize()
+    #print pad.GetSize()[0]/mm_ius
+    #print pad.GetDrillSize()[0]/mm_ius
+    #print (pad.GetDrillSize()[0]+DRL_EXTRA_ius)/mm_ius
+    #print annrX/mm_ius
     return min(annrX,annrY)
 
 def vias_annring_size(via):
     # calculating via annular
-    annr=(via.GetWidth() - (via.GetDrillValue()+DRL_EXTRA))/2
+    annr=(via.GetWidth() - (via.GetDrillValue()+DRL_EXTRA_ius))/2
     #print via.GetWidth()
     #print via.GetDrillValue()
     return annr
@@ -66,6 +69,7 @@ print("VIAS that Pass = "+repr(PassCV)+" Fails = "+repr(FailCV))
 for module in board.GetModules():
     for pad in module.Pads():
         ARv = annring_size(pad)
+        #print(f_mm(ARv))
         if ARv  < MIN_AR_SIZE:
 #            print("AR violation at %s." % (pad.GetPosition() / mm_ius ))  Raw units, needs fixing
             XYpair =  pad.GetPosition()
