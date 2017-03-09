@@ -1,8 +1,23 @@
 # -*- coding: utf-8 -*-
 #
 # A script to check for annular ring violations
-# both for pads and vias
+# both for TH pads and vias 
+# requirements: KiCAD pcbnew >= 4.0
+# annular.py release "1.5.1"
+# 
+# annular.py checking PCB for Annular Ring in Vias and TH Pads
+# (SMD, Connector and NPTH are skipped)
+# default Annular Ring >= 0.15 both for TH Pads and Vias
+# to change values modify:
+# 
+#     AR_SET = 0.150   #minimum annular accepted for pads
+#     AR_SET_V = 0.150  #minimum annular accepted for vias
+# 
+# 
+## Open Python Scripting console in pcbnew and digit:
+## execfile("annular.py")
 #
+
 ## todo
 # add colors to print
 
@@ -10,7 +25,7 @@ import sys
 import pcbnew
 from pcbnew import *
 
-___version___="1.4"
+___version___="1.5.1"
 
 mm_ius = 1000000.0
 # (consider always drill +0.1)
@@ -49,7 +64,7 @@ board = pcbnew.GetBoard()
 PassC=FailC=0
 PassCV=FailCV=0
 
-print("annular.py Testing PCB for Annular Ring Pads >= "+repr(AR_SET)+" Vias >= "+repr(AR_SET_V))
+print("annular.py Testing PCB for Annular Ring TH Pads >= "+repr(AR_SET)+" Vias >= "+repr(AR_SET_V))
 print("version = "+___version___)
 
 # print "LISTING VIAS:"
@@ -71,16 +86,18 @@ print("VIAS that Pass = "+repr(PassCV)+" Fails = "+repr(FailCV))
 
 for module in board.GetModules():
     for pad in module.Pads():
-        ARv = annring_size(pad)
-        #print(f_mm(ARv))
-        if ARv  < MIN_AR_SIZE:
-#            print("AR violation at %s." % (pad.GetPosition() / mm_ius ))  Raw units, needs fixing
-            XYpair =  pad.GetPosition()
-            print("AR violation of "+f_mm(ARv)+" at XY "+f_mm(XYpair[0])+","+f_mm(XYpair[1]) )
-            FailC = FailC+1
-        else:
-            PassC = PassC+1
-print("PADS that Pass = "+repr(PassC)+" Fails = "+repr(FailC))
+        #print(pad.GetAttribute())
+        if pad.GetAttribute() == PAD_ATTRIB_STANDARD: #TH pad
+            ARv = annring_size(pad)
+            #print(f_mm(ARv))
+            if ARv  < MIN_AR_SIZE:
+#                print("AR violation at %s." % (pad.GetPosition() / mm_ius ))  Raw units, needs fixing
+                XYpair =  pad.GetPosition()
+                print("AR violation of "+f_mm(ARv)+" at XY "+f_mm(XYpair[0])+","+f_mm(XYpair[1]) )
+                FailC = FailC+1
+            else:
+                PassC = PassC+1
+print("TH PADS that Pass = "+repr(PassC)+" Fails = "+repr(FailC))
 
 
 #  execfile("annular.py")
