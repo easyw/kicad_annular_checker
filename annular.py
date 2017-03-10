@@ -25,7 +25,7 @@ import sys
 import pcbnew
 from pcbnew import *
 
-___version___="1.5.1"
+___version___="1.5.3"
 
 mm_ius = 1000000.0
 # (consider always drill +0.1)
@@ -35,7 +35,7 @@ DRL_EXTRA_ius=DRL_EXTRA * mm_ius
 AR_SET = 0.150   #minimum annular accepted for pads
 MIN_AR_SIZE = AR_SET * mm_ius
 
-AR_SET_V = 0.150  #minimum annular accepted for vias
+AR_SET_V = 0.125  #minimum annular accepted for vias
 MIN_AR_SIZE_V = AR_SET_V * mm_ius
 
 def annring_size(pad):
@@ -44,11 +44,34 @@ def annring_size(pad):
     annrY=(pad.GetSize()[1] - (pad.GetDrillSize()[1]+DRL_EXTRA_ius))/2
     #annr=min(pad.GetSize()) - max(pad.GetDrillSize())
     #if annr < MIN_AR_SIZE:
+    #print annrX
+    #print annrY
     #print pad.GetSize()[0]/mm_ius
+    #print pad.GetSize()[0]#/mm_ius
+    #print pad.GetDrillSize()[0]#/mm_ius
+    #print DRL_EXTRA_ius
     #print pad.GetDrillSize()[0]/mm_ius
     #print (pad.GetDrillSize()[0]+DRL_EXTRA_ius)/mm_ius
     #print annrX/mm_ius
     return min(annrX,annrY)
+
+def annringNP_size(pad):
+    # valid for oval pad/drills
+    annrX=(pad.GetSize()[0] - (pad.GetDrillSize()[0]))/2
+    annrY=(pad.GetSize()[1] - (pad.GetDrillSize()[1]))/2
+    #annr=min(pad.GetSize()) - max(pad.GetDrillSize())
+    #if annr < MIN_AR_SIZE:
+    #print annrX
+    #print annrY
+    #print pad.GetSize()[0]/mm_ius
+    #print pad.GetSize()[0]#/mm_ius
+    #print pad.GetDrillSize()[0]#/mm_ius
+    #print DRL_EXTRA_ius
+    #print pad.GetDrillSize()[0]/mm_ius
+    #print (pad.GetDrillSize()[0]+DRL_EXTRA_ius)/mm_ius
+    #print annrX/mm_ius
+    #return min(annrX,annrY)
+    return annrX,annrY
 
 def vias_annring_size(via):
     # calculating via annular
@@ -64,7 +87,12 @@ board = pcbnew.GetBoard()
 PassC=FailC=0
 PassCV=FailCV=0
 
-print("annular.py Testing PCB for Annular Ring TH Pads >= "+repr(AR_SET)+" Vias >= "+repr(AR_SET_V))
+PassCN=FailCN=0
+PassCVN=FailCVN=0
+
+
+print("'annular.py'\nTesting PCB for Annular Ring TH Pads >= "+repr(AR_SET)+" Vias >= "+repr(AR_SET_V)+"\nPHD margin on PTH = "+ repr(DRL_EXTRA))
+
 print("version = "+___version___)
 
 # print "LISTING VIAS:"
@@ -77,7 +105,7 @@ for item in board.GetTracks():
         if ARv  < MIN_AR_SIZE_V:
         #            print("AR violation at %s." % (pad.GetPosition() / mm_ius ))  Raw units, needs fixing
             XYpair =  item.GetPosition()
-            print("AR violation of "+f_mm(ARv)+" at XY "+f_mm(XYpair[0])+","+f_mm(XYpair[1]) )
+            print("AR Via violation of "+f_mm(ARv)+" at XY "+f_mm(XYpair[0])+","+f_mm(XYpair[1]) )
             FailCV = FailCV+1
         else:
             PassCV = PassCV+1
@@ -93,11 +121,28 @@ for module in board.GetModules():
             if ARv  < MIN_AR_SIZE:
 #                print("AR violation at %s." % (pad.GetPosition() / mm_ius ))  Raw units, needs fixing
                 XYpair =  pad.GetPosition()
-                print("AR violation of "+f_mm(ARv)+" at XY "+f_mm(XYpair[0])+","+f_mm(XYpair[1]) )
+                print("AR PTH violation of "+f_mm(ARv)+" at XY "+f_mm(XYpair[0])+","+f_mm(XYpair[1]) )
                 FailC = FailC+1
             else:
                 PassC = PassC+1
+        if pad.GetAttribute() == PAD_ATTRIB_HOLE_NOT_PLATED:
+            ARvX, ARvY = annringNP_size(pad)
+            #print(f_mm(ARvX));print(f_mm(ARvY))
+            if (ARvX) != 0 or ARvY != 0:
+                ARv = min(ARvX, ARvY)
+                if ARv < MIN_AR_SIZE:
+#                    print("AR violation at %s." % (pad.GetPosition() / mm_ius ))  Raw units, needs fixing
+                    XYpair =  pad.GetPosition()
+                    print("AR NPTH warning of "+f_mm(ARv)+" at XY "+f_mm(XYpair[0])+","+f_mm(XYpair[1]) )
+                    FailCN = FailCN+1
+                else:
+                    PassCN = PassCN+1
+            else:
+                PassCN = PassCN+1
+            
 print("TH PADS that Pass = "+repr(PassC)+" Fails = "+repr(FailC))
+
+print("NPTH PADS that Pass = "+repr(PassCN)+" Fails = "+repr(FailCN))
 
 
 #  execfile("annular.py")
