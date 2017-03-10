@@ -2,7 +2,7 @@ A script to check for annular ring violations
 for PTH, NPTH pads and vias  
 
 requirements: KiCAD pcbnew >= 4.0  
-annular.py release "1.5.2"  
+annular.py release "1.5.3"  
 
 'annular.py' checking PCB for Annular Ring in PTH, NPTH and Vias  
 (SMD, Connector and NPTH are skipped)  
