@@ -15,7 +15,7 @@
 # 
 # 
 ## Open Python Scripting console in pcbnew and digit:
-## execfile("annular.py")
+## execfile("your_full_path_to/annular.py")
 #
 
 ## todo
